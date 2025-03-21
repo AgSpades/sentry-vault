@@ -1,0 +1,10 @@
+sentryenv
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+*.db
+*.sqlite3
+*.log
+*.log.*
+*.log-*
