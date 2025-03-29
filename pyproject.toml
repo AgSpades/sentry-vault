@@ -1,0 +1,38 @@
+[project]
+name = "sentryvault"
+version = "0.1.0"
+description = "Decentralized password manager with self-healing security"
+authors = [
+    {name = "Saumyajit",email = "86034982+AgSpades@users.noreply.github.com"}
+]
+license = {text = "Dual-licensed under GPL-3.0-or-later and SentryVault Commercial License"}
+readme = "README.md"
+requires-python = "^3.10"
+dependencies = [
+    "click (>=8.1.7,<9.0.0)",
+    "argon2-cffi (>=23.1.0,<24.0.0)",
+    "cryptography (>=44.0.2,<45.0.0)",
+    "secretsharing (>=0.2.6,<0.3.0)",
+    
+]
+
+[tool.poetry]
+license = "Dual-licensed under GPL-3.0-or-later and SentryVault Commercial License"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.3.5"
+black = "^25.1.0"
+python-dotenv = "^1.1.0"
+mypy = "^1.15.0"
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+sentryvault = "src.sentryvault.cli:main"
+
+[tool.black]
+line-length = 88
+target-version = ['py310']
+
