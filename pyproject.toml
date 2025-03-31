@@ -18,7 +18,7 @@ dependencies = [
 ]
 
 [tool.poetry]
-license = "Dual-licensed under GPL-3.0-or-later and SentryVault Commercial License"
+license = "Licensed under AGPL-3.0-or-later"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.3.5"
