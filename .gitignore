@@ -121,3 +121,6 @@ dmypy.json
 
 # Cython debug symbols
 cython_debug/
+
+# sentry_vault dev specific
+test_assets
