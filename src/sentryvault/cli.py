@@ -3,9 +3,11 @@ from getpass import getpass
 from rich.console import Console
 from rich.table import Table
 from rich.panel import Panel
+from rich.progress import Progress
 from cryptography.fernet import InvalidToken  
 from .crypto import Cryptify
 from .vault import PasswordVault
+import time
 
 console = Console()
 
@@ -21,7 +23,17 @@ def encrypt(input_file, output_file):
     """🔒 Encrypt a file and save it to output_file."""
     passphrase = getpass("Enter passphrase: ")
     crypt = Cryptify(passphrase)
-    crypt.encrypt_file(input_file, output_file)
+    
+    # Set up the progress bar
+    with Progress() as progress:
+        task = progress.add_task("[cyan]Encrypting file...", total=100)
+        
+        # Perform encryption with a simulated progress
+        crypt.encrypt_file(input_file, output_file)
+        for _ in range(100):
+            progress.update(task, advance=1)
+            time.sleep(0.05)  # Simulate encryption time
+
     console.print(f"[green][+] Encrypted[/green] {input_file} ➜ {output_file}")
 
 @main.command()
@@ -32,12 +44,15 @@ def decrypt(input_file, output_file):
     passphrase = getpass("Enter passphrase: ")
     with open(input_file, "rb") as f:
         salt = f.read()[:16]
-    try:
-        crypt = Cryptify(passphrase, salt)
-        crypt.decrypt_file(input_file, output_file)
-        console.print(f"[green][+] Decrypted[/green] {input_file} ➜ {output_file}")
-    except InvalidToken:
-        console.print("[red]❌ Invalid passphrase or corrupted file.[/red]")
+    
+    # Set up a spinner for the decryption process
+    with console.status("[bold green]Decrypting file...") as status:
+        try:
+            crypt = Cryptify(passphrase, salt)
+            crypt.decrypt_file(input_file, output_file)
+            console.print(f"[green][+] Decrypted[/green] {input_file} ➜ {output_file}")
+        except InvalidToken:
+            console.print("[red]❌ Invalid passphrase or corrupted file.[/red]")
 
 # -----------------------------
 # Password Vault Subcommands
