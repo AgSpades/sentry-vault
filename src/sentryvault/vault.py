@@ -1,4 +1,3 @@
-# src/sentryvault/vault.py
 import json
 import os
 from .crypto import Cryptify

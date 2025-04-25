@@ -3,8 +3,7 @@ from getpass import getpass
 from rich.console import Console
 from rich.table import Table
 from rich.panel import Panel
-from cryptography.fernet import InvalidToken  # 🔧 New import
-
+from cryptography.fernet import InvalidToken  
 from .crypto import Cryptify
 from .vault import PasswordVault
 
@@ -50,10 +49,10 @@ def get_passphrase():
 @main.command()
 @click.argument("site")
 @click.argument("username")
-@click.argument("password")
-def add(site, username, password):
+def add(site, username):
     """➕ Add or update a password entry."""
     try:
+        password = click.prompt("Enter password", hide_input=True, confirmation_prompt=True)
         vault = PasswordVault(get_passphrase())
         vault.add_entry(site, username, password)
         console.print(f"[cyan]🔐 Added[/cyan] entry for [bold]{site}[/bold]")
