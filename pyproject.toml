@@ -14,6 +14,7 @@ dependencies = [
     "argon2-cffi (>=23.1.0,<24.0.0)",
     "cryptography (>=44.0.2,<45.0.0)",
     "secretsharing (>=0.2.6,<0.3.0)",
+    "rich (>=14.0.0,<15.0.0)",
     
 ]
 

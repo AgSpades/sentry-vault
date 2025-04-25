@@ -92,7 +92,7 @@ celerybeat-schedule
 .env.*
 
 # virtualenv
-venv/
+.venv/
 ENV/
 env/
 venv.bak/
@@ -124,3 +124,4 @@ cython_debug/
 
 # sentry_vault dev specific
 test_assets
+*.enc
