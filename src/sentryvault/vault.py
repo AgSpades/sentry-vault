@@ -47,3 +47,15 @@ class PasswordVault:
             self._write_data(data)
             return True
         return False
+def verify_passphrase(self, passphrase: str) -> bool:
+    """Verify if the given passphrase can decrypt the vault."""
+    try:
+        with open(self.vault_path, "rb") as f:
+            salt = f.read(16)
+            encrypted_data = f.read()
+        temp_crypt = Cryptify(passphrase, salt)
+        decrypted = temp_crypt.decrypt(encrypted_data)
+        json.loads(decrypted)  # Sanity check: is it valid JSON?
+        return True
+    except Exception:
+        return False
