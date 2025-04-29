@@ -24,7 +24,7 @@ def encrypt(input_file, output_file):
     passphrase = getpass("Enter passphrase: ")
     crypt = Cryptify(passphrase)
     
-    # Set up the progress bar
+    # progress bar
     with Progress() as progress:
         task = progress.add_task("[cyan]Encrypting file...", total=100)
         
@@ -45,7 +45,7 @@ def decrypt(input_file, output_file):
     with open(input_file, "rb") as f:
         salt = f.read()[:16]
     
-    # Set up a spinner for the decryption process
+    # spinner for the decryption process
     with console.status("[bold green]Decrypting file...") as status:
         try:
             crypt = Cryptify(passphrase, salt)

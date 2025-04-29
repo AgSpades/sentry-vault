@@ -9,7 +9,7 @@ class PasswordVault:
         self.crypt = Cryptify(passphrase)
 
         if not os.path.exists(vault_path):
-            self._write_data({})  # create empty vault
+            self._write_data({})  
 
     def _read_data(self):
         with open(self.vault_path, "rb") as f:
@@ -54,7 +54,7 @@ def verify_passphrase(self, passphrase: str) -> bool:
             encrypted_data = f.read()
         temp_crypt = Cryptify(passphrase, salt)
         decrypted = temp_crypt.decrypt(encrypted_data)
-        json.loads(decrypted)  # Sanity check: is it valid JSON?
+        json.loads(decrypted)  
         return True
     except Exception:
         return False
