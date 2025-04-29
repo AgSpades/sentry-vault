@@ -28,7 +28,6 @@ def encrypt(input_file, output_file):
     with Progress() as progress:
         task = progress.add_task("[cyan]Encrypting file...", total=100)
         
-        # Perform encryption with a simulated progress
         crypt.encrypt_file(input_file, output_file)
         for _ in range(100):
             progress.update(task, advance=1)
