@@ -4,12 +4,38 @@ from rich.console import Console
 from rich.table import Table
 from rich.panel import Panel
 from rich.progress import Progress
-from cryptography.fernet import InvalidToken  
+from cryptography.fernet import InvalidToken
 from .crypto import Cryptify
 from .vault import PasswordVault
 import time
+import os # Added for vault_path default handling
 
 console = Console()
+
+# --- Helper for Sharding Configuration ---
+def _create_sharding_config(total_shares, threshold):
+    if total_shares is not None and threshold is not None:
+        if not isinstance(total_shares, int) or not isinstance(threshold, int):
+            console.print("[red]❌ Total shares and threshold must be integers.[/red]")
+            return None, True
+        if threshold < 2:
+            console.print("[red]❌ Threshold must be at least 2 for Shamir's Secret Sharing.[/red]")
+            return None, True
+        if total_shares < threshold:
+            console.print("[red]❌ Total shares must be greater than or equal to the threshold.[/red]")
+            return None, True
+        return {"total_shares": total_shares, "threshold": threshold}, False
+    elif total_shares is not None or threshold is not None:
+        console.print("[red]❌ Both --total-shares and --threshold must be provided together for sharding, or neither for a non-sharded vault.[/red]")
+        return None, True
+    return None, False # No sharding config, no error
+
+# --- Common Click options for vault commands ---
+def vault_options(func):
+    func = click.option('--vault-path', default=os.path.join(os.getcwd(), "vault.enc"), help="Path to the vault file or base name for shares.", show_default=True, type=click.Path())(func)
+    func = click.option('--total-shares', type=int, help="Total number of shares for sharding (requires --threshold).")(func)
+    func = click.option('--threshold', type=int, help="Minimum shares needed to reconstruct (requires --total-shares).")(func)
+    return func
 
 @click.group()
 def main():
@@ -17,124 +43,255 @@ def main():
     console.print(Panel.fit("[bold green]SentryVault CLI[/bold green]\n[cyan]AI-powered decentralized password manager[/cyan]"))
 
 @main.command()
-@click.argument("input_file", type=click.Path(exists=True))
-@click.argument("output_file", type=click.Path())
+@click.argument("input_file", type=click.Path(exists=True, dir_okay=False, resolve_path=True))
+@click.argument("output_file", type=click.Path(dir_okay=False, resolve_path=True))
 def encrypt(input_file, output_file):
     """🔒 Encrypt a file and save it to output_file."""
     passphrase = getpass("Enter passphrase: ")
+    if not passphrase:
+        console.print("[red]❌ Passphrase cannot be empty.[/red]")
+        return
     crypt = Cryptify(passphrase)
     
-    # progress bar
-    with Progress() as progress:
+    with Progress(console=console) as progress:
         task = progress.add_task("[cyan]Encrypting file...", total=100)
-        
-        crypt.encrypt_file(input_file, output_file)
-        for _ in range(100):
-            progress.update(task, advance=1)
-            time.sleep(0.05)  # Simulate encryption time
+        try:
+            crypt.encrypt_file(input_file, output_file)
+            # Simulate progress if encryption is very fast
+            for _ in range(100):
+                if progress.tasks[task].completed >= 100:
+                    break
+                progress.update(task, advance=1)
+                time.sleep(0.01) # Shorter sleep
+            progress.update(task, completed=100) # Ensure it completes
+        except Exception as e:
+            progress.stop()
+            console.print(f"[red]❌ Encryption failed: {e}[/red]")
+            return
 
     console.print(f"[green][+] Encrypted[/green] {input_file} ➜ {output_file}")
 
 @main.command()
-@click.argument("input_file", type=click.Path(exists=True))
-@click.argument("output_file", type=click.Path())
+@click.argument("input_file", type=click.Path(exists=True, dir_okay=False, resolve_path=True))
+@click.argument("output_file", type=click.Path(dir_okay=False, resolve_path=True))
 def decrypt(input_file, output_file):
     """🔓 Decrypt a file using the same passphrase."""
     passphrase = getpass("Enter passphrase: ")
-    with open(input_file, "rb") as f:
-        salt = f.read()[:16]
+    if not passphrase:
+        console.print("[red]❌ Passphrase cannot be empty.[/red]")
+        return
+        
+    salt = None
+    try:
+        with open(input_file, "rb") as f:
+            salt = f.read(16) # Read only the first 16 bytes for salt
+        if len(salt) < 16:
+            console.print("[red]❌ Input file is too short to contain a valid salt.[/red]")
+            return
+    except IOError as e:
+        console.print(f"[red]❌ Could not read input file {input_file}: {e}[/red]")
+        return
     
-    # spinner for the decryption process
     with console.status("[bold green]Decrypting file...") as status:
         try:
             crypt = Cryptify(passphrase, salt)
             crypt.decrypt_file(input_file, output_file)
+            status.stop()
             console.print(f"[green][+] Decrypted[/green] {input_file} ➜ {output_file}")
         except InvalidToken:
+            status.stop()
             console.print("[red]❌ Invalid passphrase or corrupted file.[/red]")
+        except Exception as e:
+            status.stop()
+            console.print(f"[red]❌ Decryption failed: {e}[/red]")
 
 # -----------------------------
 # Password Vault Subcommands
 # -----------------------------
 
-def get_passphrase():
-    return getpass("Enter your vault passphrase: ")
+def get_vault_passphrase():
+    passphrase = getpass("Enter your vault passphrase: ")
+    if not passphrase:
+        console.print("[red]❌ Passphrase cannot be empty.[/red]")
+        return None
+    return passphrase
 
 @main.command()
+@vault_options
 @click.argument("site")
 @click.argument("username")
-def add(site, username):
+def add(site, username, vault_path, total_shares, threshold):
     """➕ Add or update a password entry."""
+    password = click.prompt("Enter password for site", hide_input=True, confirmation_prompt="Confirm password for site")
+    if not password:
+        console.print("[red]❌ Password cannot be empty.[/red]")
+        return
+
+    sharding_config, err = _create_sharding_config(total_shares, threshold)
+    if err:
+        return
+
+    passphrase = get_vault_passphrase()
+    if not passphrase:
+        return
+
     try:
-        password = click.prompt("Enter password", hide_input=True, confirmation_prompt=True)
-        vault = PasswordVault(get_passphrase())
+        vault = PasswordVault(passphrase, vault_path=vault_path, sharding_config=sharding_config)
         vault.add_entry(site, username, password)
-        console.print(f"[cyan]🔐 Added[/cyan] entry for [bold]{site}[/bold]")
+        mode = "sharded" if sharding_config else "non-sharded"
+        console.print(f"[cyan]🔐 Added[/cyan] entry for [bold]{site}[/bold] to {mode} vault '{os.path.basename(vault_path)}'.")
     except InvalidToken:
-        console.print("[red]❌ Incorrect passphrase.[/red]")
+        console.print("[red]❌ Incorrect passphrase or corrupted vault.[/red]")
+    except ValueError as e:
+        console.print(f"[red]❌ Vault operation error: {e}[/red]")
+    except Exception as e:
+        console.print(f"[red]❌ An unexpected error occurred: {e}[/red]")
 
 @main.command()
+@vault_options
 @click.argument("site")
 @click.option("--show", is_flag=True, help="Display password in plaintext.")
-def get(site, show):
+def get(site, vault_path, total_shares, threshold, show):
     """🔍 Retrieve login info for a site."""
+    sharding_config, err = _create_sharding_config(total_shares, threshold)
+    if err:
+        return
+
+    passphrase = get_vault_passphrase()
+    if not passphrase:
+        return
+
     try:
-        vault = PasswordVault(get_passphrase())
+        vault = PasswordVault(passphrase, vault_path=vault_path, sharding_config=sharding_config)
         entry = vault.get_entry(site)
         if entry:
-            table = Table(title=f"🔑 Entry: {site}", show_header=True, header_style="bold magenta")
+            table = Table(title=f"🔑 Entry: {site} (from '{os.path.basename(vault_path)}')", show_header=True, header_style="bold magenta")
             table.add_column("Field", style="cyan")
             table.add_column("Value", style="green")
             table.add_row("Username", entry["username"])
-            table.add_row("Password", entry["password"] if show else "•" * 10)
+            table.add_row("Password", entry["password"] if show else "•" * len(entry["password"]))
             console.print(table)
         else:
-            console.print(f"[red]❌ Entry not found for[/red] {site}")
+            console.print(f"[red]❌ Entry not found for[/red] {site} in vault '{os.path.basename(vault_path)}'.")
     except InvalidToken:
-        console.print("[red]❌ Incorrect passphrase.[/red]")
+        console.print("[red]❌ Incorrect passphrase or corrupted vault.[/red]")
+    except ValueError as e:
+        console.print(f"[red]❌ Vault operation error: {e}[/red]")
+    except Exception as e:
+        console.print(f"[red]❌ An unexpected error occurred: {e}[/red]")
 
 @main.command(name="list")
-def list_entries():
+@vault_options
+def list_entries(vault_path, total_shares, threshold):
     """📂 List all stored entry names."""
+    sharding_config, err = _create_sharding_config(total_shares, threshold)
+    if err:
+        return
+
+    passphrase = get_vault_passphrase()
+    if not passphrase:
+        return
+
     try:
-        vault = PasswordVault(get_passphrase())
+        vault = PasswordVault(passphrase, vault_path=vault_path, sharding_config=sharding_config)
         keys = vault.list_entries()
+        mode = "sharded" if sharding_config else "non-sharded"
+        title = f"📁 Stored Entries in {mode} vault '{os.path.basename(vault_path)}'"
         if keys:
-            table = Table(title="📁 Stored Entries", show_lines=True, header_style="bold blue")
+            table = Table(title=title, show_lines=True, header_style="bold blue")
             table.add_column("Site", style="cyan")
-            for key in keys:
-                table.add_row(key)
+            for key_name in keys: # Renamed key to key_name to avoid conflict with PasswordVault.key
+                table.add_row(key_name)
             console.print(table)
         else:
-            console.print("[yellow]⚠️ Vault is empty.[/yellow]")
+            console.print(f"[yellow]⚠️ Vault '{os.path.basename(vault_path)}' is empty or no entries found.[/yellow]")
     except InvalidToken:
-        console.print("[red]❌ Incorrect passphrase.[/red]")
+        console.print("[red]❌ Incorrect passphrase or corrupted vault.[/red]")
+    except ValueError as e:
+        console.print(f"[red]❌ Vault operation error: {e}[/red]")
+    except Exception as e:
+        console.print(f"[red]❌ An unexpected error occurred: {e}[/red]")
 
 @main.command()
+@vault_options
 @click.argument("site")
-def delete(site):
+def delete(site, vault_path, total_shares, threshold):
     """🗑️ Delete a password entry."""
+    sharding_config, err = _create_sharding_config(total_shares, threshold)
+    if err:
+        return
+
+    passphrase = get_vault_passphrase()
+    if not passphrase:
+        return
+        
+    confirm = click.confirm(f"Are you sure you want to delete the entry for '{site}' from vault '{os.path.basename(vault_path)}'?", abort=True)
+
     try:
-        vault = PasswordVault(get_passphrase())
+        vault = PasswordVault(passphrase, vault_path=vault_path, sharding_config=sharding_config)
         if vault.delete_entry(site):
-            console.print(f"[red]🗑️ Deleted[/red] entry for [bold]{site}[/bold]")
+            mode = "sharded" if sharding_config else "non-sharded"
+            console.print(f"[red]🗑️ Deleted[/red] entry for [bold]{site}[/bold] from {mode} vault '{os.path.basename(vault_path)}'.")
         else:
-            console.print(f"[red]❌ No entry found for[/red] {site}")
+            console.print(f"[red]❌ No entry found for[/red] {site} in vault '{os.path.basename(vault_path)}'.")
     except InvalidToken:
-        console.print("[red]❌ Incorrect passphrase.[/red]")
+        console.print("[red]❌ Incorrect passphrase or corrupted vault.[/red]")
+    except ValueError as e:
+        console.print(f"[red]❌ Vault operation error: {e}[/red]")
+    except Exception as e:
+        console.print(f"[red]❌ An unexpected error occurred: {e}[/red]")
 
 @main.command()
-def change_passphrase():
+@vault_options
+def change_passphrase(vault_path, total_shares, threshold):
     """🔑 Change your vault passphrase securely."""
-    old_passphrase = getpass("Enter current passphrase: ")
-    new_passphrase = getpass("Enter new passphrase: ")
-    confirm_passphrase = getpass("Confirm new passphrase: ")
-    if new_passphrase != confirm_passphrase:
-        console.print("[red]❌ Passphrases do not match.[/red]")
+    console.print(f"Attempting to change passphrase for vault: '{os.path.basename(vault_path)}'")
+    old_passphrase = getpass("Enter current vault passphrase: ")
+    if not old_passphrase:
+        console.print("[red]❌ Current passphrase cannot be empty.[/red]")
         return
+
+    new_passphrase = getpass("Enter new vault passphrase: ")
+    if not new_passphrase:
+        console.print("[red]❌ New passphrase cannot be empty.[/red]")
+        return
+        
+    confirm_passphrase = getpass("Confirm new vault passphrase: ")
+    if new_passphrase != confirm_passphrase:
+        console.print("[red]❌ New passphrases do not match.[/red]")
+        return
+    
+    if old_passphrase == new_passphrase:
+        console.print("[yellow]⚠️ New passphrase is the same as the old passphrase. No change made.[/yellow]")
+        return
+
+    sharding_config, err = _create_sharding_config(total_shares, threshold)
+    if err:
+        return
+
     try:
-        vault = PasswordVault(old_passphrase)
-        vault.change_passphrase(new_passphrase)
-        console.print("[green]🔑 Passphrase updated successfully.[/green]")
+        # Initialize with old passphrase to read data
+        vault = PasswordVault(old_passphrase, vault_path=vault_path, sharding_config=sharding_config)
+        all_data = vault._read_data() # Decrypts with old passphrase
+
+        # Re-initialize the vault's crypto components with the new passphrase
+        # This will use a new salt by default when Cryptify is re-initialized
+        vault.passphrase = new_passphrase
+        vault.crypt = Cryptify(new_passphrase) 
+        
+        vault._write_data(all_data) # Encrypts with new passphrase/salt and writes (sharded or not)
+
+        mode = "sharded" if sharding_config else "non-sharded"
+        console.print(f"[green]🔑 Passphrase updated successfully for {mode} vault '{os.path.basename(vault_path)}'.[/green]")
+        if sharding_config:
+            console.print(f"[green]   Sharding Config: Total Shares: {sharding_config['total_shares']}, Threshold: {sharding_config['threshold']}[/green]")
+
     except InvalidToken:
-        console.print("[red]❌ Incorrect current passphrase.[/red]")
+        console.print("[red]❌ Incorrect current passphrase or corrupted vault. Passphrase not changed.[/red]")
+    except ValueError as e:
+        console.print(f"[red]❌ Vault operation error during passphrase change: {e}[/red]")
+    except Exception as e:
+        console.print(f"[red]❌ An unexpected error occurred during passphrase change: {e}[/red]")
+
+if __name__ == '__main__':
+    main()
