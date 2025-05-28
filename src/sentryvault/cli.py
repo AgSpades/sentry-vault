@@ -39,7 +39,7 @@ def vault_options(func):
 
 @click.group()
 def main():
-    """🔐 SentryVault: AI-powered decentralized password manager."""
+    """🔐 SentryVault: Quantum resistant password manager."""
     console.print(Panel.fit("[bold green]SentryVault CLI[/bold green]\n[cyan]AI-powered decentralized password manager[/cyan]"))
 
 @main.command()
