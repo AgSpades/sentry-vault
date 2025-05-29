@@ -1,4 +1,3 @@
-# src/sentryvault/cryptify.py
 from cryptography.fernet import Fernet
 from argon2.low_level import hash_secret_raw, Type
 import base64
@@ -6,7 +5,7 @@ import os
 
 class Cryptify:
     def __init__(self, passphrase, salt=None):
-        self.passphrase = passphrase  # 🔧 Needed for decrypt_file
+        self.passphrase = passphrase  
         self.salt = salt or os.urandom(16)
         self.key = self._derive_key(passphrase, self.salt)
         self.cipher = Fernet(self.key)
