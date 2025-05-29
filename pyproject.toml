@@ -3,10 +3,10 @@ name = "sentryvault"
 version = "0.1.0"
 description = "AI powered decentralized password manager with self-healing security"
 authors = [
-    {name = "Saumyajit",email = "86034982+AgSpades@users.noreply.github.com"}
+    {name = "Saumyajit",email = "psaumyajit@outlook.com"}
 ]
 license = {text = "AGPL-3.0-or-later"}
-keywords = ["password manager", "decentralized", "AI", "self-healing security"]
+keywords = ["password manager", "decentralized", "AI", "self-healing security","quantum resistant"]
 readme = "README.md"
 requires-python = "^3.10"
 dependencies = [

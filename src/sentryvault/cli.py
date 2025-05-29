@@ -39,8 +39,8 @@ def vault_options(func):
 
 @click.group()
 def main():
-    """🔐 SentryVault: Quantum resistant password manager."""
-    console.print(Panel.fit("[bold green]SentryVault CLI[/bold green]\n[cyan]AI-powered decentralized password manager[/cyan]"))
+    """🔐 SentryVault: Quantum resistant decentralized password manager."""
+    console.print(Panel.fit("[bold green]SentryVault CLI[/bold green]\n[cyan]Quantum resistant decentralized password manager[/cyan]"))
 
 @main.command()
 @click.argument("input_file", type=click.Path(exists=True, dir_okay=False, resolve_path=True))
