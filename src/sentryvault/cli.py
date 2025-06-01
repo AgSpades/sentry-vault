@@ -473,15 +473,8 @@ def generate_password(
         console.print(f"[dim]Entropy: {entropy:.2f} bits[/]")
 
         # Add to clipboard history if available
-        if copy and "pyperclip" in globals():
-            try:
-                from rich.clipboard import Clipboard
-
-                clipboard = Clipboard()
-                clipboard.store(password)
-            except ImportError:
-                pass
-
+        # (Removed rich.clipboard usage because it does not exist)
+        
     except Exception as e:
         console.print(f"[red]❌ Error generating password: {e}[/]")
         return 1
