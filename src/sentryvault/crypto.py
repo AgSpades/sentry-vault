@@ -3,9 +3,10 @@ from argon2.low_level import hash_secret_raw, Type
 import base64
 import os
 
+
 class Cryptify:
     def __init__(self, passphrase, salt=None):
-        self.passphrase = passphrase  
+        self.passphrase = passphrase
         self.salt = salt or os.urandom(16)
         self.key = self._derive_key(passphrase, self.salt)
         self.cipher = Fernet(self.key)
@@ -18,7 +19,7 @@ class Cryptify:
             memory_cost=512000,
             parallelism=8,
             hash_len=32,
-            type=Type.ID
+            type=Type.ID,
         )
         return base64.urlsafe_b64encode(raw_key)
 
