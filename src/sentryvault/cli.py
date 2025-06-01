@@ -9,6 +9,9 @@ from .crypto import Cryptify
 from .vault import PasswordVault
 import time
 import os # Added for vault_path default handling
+from pathlib import Path
+from typing import Optional
+from .passgen import PasswordGenerator, PasswordType
 
 console = Console()
 
@@ -292,6 +295,75 @@ def change_passphrase(vault_path, total_shares, threshold):
         console.print(f"[red]❌ Vault operation error during passphrase change: {e}[/red]")
     except Exception as e:
         console.print(f"[red]❌ An unexpected error occurred during passphrase change: {e}[/red]")
+
+@main.command()
+@click.option('--type', '-t', type=click.Choice(['random', 'memorable', 'pin'], case_sensitive=False),
+              default='random', help='Type of password to generate')
+@click.option('--length', '-l', type=int, default=16, help='Exact length for random passwords or PINs')
+@click.option('--r-length', type=int, help='Rough target length for memorable passwords (e.g., 16 for "SecureWolf!42")')
+@click.option('--no-upper', is_flag=True, help='Exclude uppercase letters')
+@click.option('--no-digits', is_flag=True, help='Exclude digits')
+@click.option('--no-special', is_flag=True, help='Exclude special characters')
+@click.option('--wordlist', type=click.Path(exists=True, dir_okay=False, path_type=Path), 
+              help='Path to custom wordlist file')
+@click.option('--copy', '-c', is_flag=True, help='Copy password to clipboard')
+def generate_password(type, length, r_length, no_upper, no_digits, no_special, wordlist, copy):
+    """🔐 Generate a secure password or passphrase."""
+    try:
+        # Map type to PasswordType enum
+        ptype = {
+            'random': PasswordType.RANDOM,
+            'memorable': PasswordType.MEMORABLE,
+            'pin': PasswordType.PIN
+        }[type.lower()]
+        
+        # Create password generator with optional wordlist
+        generator = PasswordGenerator(wordlist_path=wordlist)
+        
+        # For memorable passwords, use r_length if provided, otherwise default to 16
+        target_length = r_length if ptype == PasswordType.MEMORABLE and r_length is not None else length
+        
+        # Generate the password
+        password = generator.generate(
+            ptype=ptype,
+            length=target_length,
+            use_uppercase=not no_upper,
+            use_digits=not no_digits,
+            use_special=not no_special
+        )
+        
+        # Display the password
+        console.print("\n[bold green]Generated Password:[/]")
+        console.print(f"[bold cyan]{password}[/]")
+        
+        # Copy to clipboard if requested
+        if copy:
+            try:
+                import pyperclip
+                pyperclip.copy(password)
+                console.print("[green]✓ Password copied to clipboard![/]")
+            except ImportError:
+                console.print("[yellow]⚠ Install 'pyperclip' for clipboard support: pip install pyperclip[/]")
+        
+        # Calculate and display entropy
+        entropy = generator.calculate_entropy(password)
+        console.print(f"[dim]Entropy: {entropy:.2f} bits[/]")
+        
+        # Add to clipboard history if available
+        if copy and 'pyperclip' in globals():
+            try:
+                from rich.clipboard import Clipboard
+                clipboard = Clipboard()
+                clipboard.store(password)
+            except ImportError:
+                pass
+                
+    except Exception as e:
+        console.print(f"[red]❌ Error generating password: {e}[/]")
+        return 1
+    
+    return 0
+
 
 if __name__ == '__main__':
     main()
