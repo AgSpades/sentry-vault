@@ -1,6 +1,7 @@
 from secretsharing import SecretSharer
 import json
 
+
 class Sharding:
     @staticmethod
     def split_secret(secret, total_shares, threshold):
