@@ -56,10 +56,10 @@ cd sentry-vault
 poetry install
 
 # Activate the virtual environment
-poetry shell
+poetry env activate
 
 # Run the CLI
-sentryvault --help
+poetry run sentryvault --help
 ```
 
 ## 📜 Usage
@@ -68,42 +68,33 @@ sentryvault --help
 
 ```bash
 # Add a new credential
-sentryvault add example.com username
+poetry run sentryvault add example.com username
 
 # Retrieve a credential
-sentryvault get example.com
+poetry run sentryvault get example.com
 
 # List all stored entries
-sentryvault list
+poetry run sentryvault list
 
 # Remove a credential
-sentryvault delete example.com
+poetry run sentryvault delete example.com
 
 # Change your master passphrase
-sentryvault change-passphrase
+poetry run sentryvault change-passphrase
 
 # Generate a secure password
-sentryvault generate-password --type=random --length=16
+poetry run sentryvault generate-password --length 20
 ```
 
-### Using Sharded Vaults
-
-```bash
-# Create a sharded vault (3 out of 5 shares required to recover)
-sentryvault add example.com username --total-shares=5 --threshold=3
-
-# Access a sharded vault
-sentryvault get example.com --total-shares=5 --threshold=3
-```
 
 ### File Encryption
 
 ```bash
 # Encrypt a file
-sentryvault encrypt sensitive.txt sensitive.enc
+poetry run sentryvault encrypt sensitive.txt sensitive.enc
 
 # Decrypt a file
-sentryvault decrypt sensitive.enc sensitive_decrypted.txt
+poetry run sentryvault decrypt sensitive.enc sensitive_decrypted.txt
 ```
 
 ## 🔧 Advanced Usage
@@ -118,10 +109,10 @@ sentryvault decrypt sensitive.enc sensitive_decrypted.txt
 
 ```bash
 # Generate a random password with specific requirements
-sentryvault generate-password --type=random --length=20 --no-upper --no-special
+poetry run sentryvault generate-password --length 20
 
-# Generate a memorable passphrase
-sentryvault generate-password --type=passphrase --words=6
+# Generate a memorable passphrase and copy to clipboard
+poetry run sentryvault generate-password --type memorable -c 
 ```
 
 ## 🛡️ Security Best Practices
@@ -143,7 +134,7 @@ We welcome contributions! Please read our [Contribution Guidelines](CONTRIBUTING
 poetry install --with dev
 
 # Run tests
-poetry run pytest
+poetry run pytest #tests are yet to be developed, feel free to contribute
 
 # Format code
 poetry run black .
