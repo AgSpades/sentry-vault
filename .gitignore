@@ -125,3 +125,4 @@ cython_debug/
 # sentry_vault dev specific
 test_assets
 *.enc
+vault.enc.s*

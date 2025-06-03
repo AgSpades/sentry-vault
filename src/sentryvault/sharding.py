@@ -1,4 +1,4 @@
-from secretsharing import SecretSharer
+from pyseltongue import SecretSharer
 import json
 
 
