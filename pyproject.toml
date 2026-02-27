@@ -2,11 +2,15 @@
 name = "sentryvault"
 version = "0.1.0"
 description = "AI powered decentralized password manager with self-healing security"
-authors = [
-    {name = "Saumyajit",email = "psaumyajit@outlook.com"}
+authors = [{ name = "Saumyajit", email = "psaumyajit@outlook.com" }]
+license = { text = "AGPL-3.0-or-later" }
+keywords = [
+    "password manager",
+    "decentralized",
+    "AI",
+    "self-healing security",
+    "quantum resistant",
 ]
-license = {text = "AGPL-3.0-or-later"}
-keywords = ["password manager", "decentralized", "AI", "self-healing security","quantum resistant"]
 readme = "README.md"
 requires-python = "^3.10"
 dependencies = [
@@ -15,9 +19,8 @@ dependencies = [
     "cryptography (>=44.0.2,<45.0.0)",
     "pyshamir (>=1.0.4,<2.0.0)",
     "rich (>=14.0.0,<15.0.0)",
-    "nltk (>=3.9.1,<4.0.0)",
+    "nltk (>=3.9.3,<4.0.0)",
     "pyperclip (>=1.9.0,<2.0.0)",
-    
 ]
 
 [tool.poetry]
@@ -39,4 +42,3 @@ sentryvault = "src.sentryvault.cli:main"
 [tool.black]
 line-length = 88
 target-version = ['py310']
-
