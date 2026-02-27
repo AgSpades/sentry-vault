@@ -1,4 +1,4 @@
-from secretsharing import SecretSharer
+import pyshamir
 import json
 
 
@@ -14,9 +14,18 @@ class Sharding:
             threshold (int): Minimum number of shares required to reconstruct the secret.
 
         Returns:
-            list: A list of shares.
+            list: A list of shares (as strings).
         """
-        shares = SecretSharer.split_secret(secret, threshold, total_shares)
+        # Convert string to bytes for pyshamir
+        secret_bytes = secret.encode("utf-8")
+
+        # pyshamir.split(secret, parts, threshold) - note parameter order
+        share_bytes = pyshamir.split(secret_bytes, total_shares, threshold)
+
+        # Convert bytearray shares to base64-encoded strings for JSON compatibility
+        import base64
+
+        shares = [base64.b64encode(share).decode("ascii") for share in share_bytes]
         return shares
 
     @staticmethod
@@ -25,12 +34,23 @@ class Sharding:
         Combine shares to reconstruct the secret.
 
         Args:
-            shares (list): A list of shares.
+            shares (list): A list of shares (as strings).
 
         Returns:
             str: The reconstructed secret.
         """
-        secret = SecretSharer.recover_secret(shares)
+        # Convert base64 strings back to bytearray
+        import base64
+
+        share_bytes = [
+            bytearray(base64.b64decode(share.encode("ascii"))) for share in shares
+        ]
+
+        # Combine using pyshamir
+        secret_bytes = pyshamir.combine(share_bytes)
+
+        # Convert bytes back to string
+        secret = secret_bytes.decode("utf-8")
         return secret
 
     @staticmethod
