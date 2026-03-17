@@ -3,7 +3,7 @@ name: Release Branch PyPI Publish
 on:
   push:
     branches:
-      - release
+      - 'release-*'
   workflow_dispatch:
 
 jobs:
