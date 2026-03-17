@@ -1,7 +1,7 @@
 import re
 from pathlib import Path
 
-from sentryvault.passgen import PasswordGenerator, PasswordType
+from sentryvault.passgen.passgen import PasswordGenerator, PasswordType
 
 
 def _make_wordlist(tmp_path: Path) -> Path:

@@ -1,18 +1,18 @@
 [project]
 name = "sentryvault"
 version = "0.1.0"
-description = "AI powered decentralized password manager with self-healing security"
-authors = [{ name = "Saumyajit", email = "psaumyajit@outlook.com" }]
-license = { text = "AGPL-3.0-or-later" }
+description = "Secure local password manager with Argon2/Fernet encryption and optional Shamir-based sharding"
+authors = [{ name = "Saumyajit Purakayastha", email = "mail@saumyajit.dev" }]
+license = "AGPL-3.0-or-later"
 keywords = [
     "password manager",
-    "decentralized",
-    "AI",
-    "self-healing security",
-    "quantum resistant",
+    "local-first",
+    "shamir secret sharing",
+    "argon2",
+    "encryption",
 ]
 readme = "README.md"
-requires-python = "^3.10"
+requires-python = ">=3.10,<4.0"
 dependencies = [
     "click (>=8.1.7,<9.0.0)",
     "argon2-cffi (>=23.1.0,<24.0.0)",
@@ -23,8 +23,8 @@ dependencies = [
     "pyperclip (>=1.9.0,<2.0.0)",
 ]
 
-[tool.poetry]
-license = "Licensed under AGPL-3.0-or-later"
+[project.scripts]
+sentryvault = "sentryvault.cli:main"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.3.5"
@@ -36,9 +36,6 @@ mypy = "^1.15.0"
 requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
 
-[tool.poetry.scripts]
-sentryvault = "src.sentryvault.cli:main"
-
 [tool.black]
 line-length = 88
-target-version = ['py310']
+target-version = ['py313']

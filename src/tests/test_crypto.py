@@ -3,7 +3,7 @@ from pathlib import Path
 import pytest
 from cryptography.fernet import InvalidToken
 
-from sentryvault.crypto import Cryptify
+from sentryvault.crypto.crypto import Cryptify
 
 
 def test_encrypt_decrypt_roundtrip_text():

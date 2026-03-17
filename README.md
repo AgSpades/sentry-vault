@@ -1,7 +1,7 @@
 # Sentry Vault
 
 ![Sentry Vault](assets/sentry-vault-logo.png)  
-_A security-focused password manager with decentralized storage and quantum-resistant encryption._
+_A security-focused local password manager with optional sharded storage._
 
 [![License: AGPL-3.0](https://img.shields.io/badge/License-AGPL%203.0-blue.svg)](LICENSE)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
@@ -13,18 +13,17 @@ Sentry Vault is an open-source, high-security password manager designed with pri
 
 ### 🔑 Core Security Features
 
-- **Military-Grade Encryption**: Combines Argon2 for key derivation with AES-128 in Fernet mode for encryption
-- **Decentralized Storage**: Implements Shamir's Secret Sharing to split your vault across multiple locations
+- **Strong Encryption**: Uses Argon2id for key derivation and Fernet for authenticated encryption
+- **Sharded Storage**: Uses Shamir's Secret Sharing to split encrypted vault data into threshold-based shares
 - **Zero-Knowledge Architecture**: Your master password never leaves your device
-- **Semantic Passphrase Generation**: Create memorable yet secure passphrases
-- **Quantum-Resistant Design**: Ready for the post-quantum era with forward-thinking architecture
+- **Passphrase Generation**: Create random, memorable, or PIN-style credentials from the CLI
 
 ## 🚀 Features
 
 ### 🔒 Core Functionality
 
-- **Secure Credential Storage**: Store usernames and passwords with military-grade encryption
-- **Sharded Vaults**: Optional Shamir's Secret Sharing for decentralized storage
+- **Secure Credential Storage**: Store usernames and passwords in an encrypted local vault
+- **Sharded Vaults**: Optional threshold-based sharding using Shamir's Secret Sharing
 - **Rich CLI Interface**: Beautiful terminal interface with colorized output and progress bars
 - **Password Generator**: Built-in tool for creating strong, random passwords
 - **Secure File Encryption**: Encrypt/decrypt files using the same strong cryptography
@@ -32,10 +31,9 @@ Sentry Vault is an open-source, high-security password manager designed with pri
 ### 🛡️ Security Features
 
 - **Argon2** for key derivation (memory-hard and resistant to GPU/ASIC attacks)
-- **AES-128** in Fernet mode for authenticated encryption
+- **Fernet authenticated encryption** for confidentiality and integrity
 - **HMAC** for data integrity verification
-- **Secure Memory Management**: Sensitive data is wiped from memory when no longer needed
-- **Time-Constant String Comparison**: Prevents timing attacks
+- **Per-vault salt handling** persisted with encrypted vault payloads
 
 ## 🛠 Installation
 
@@ -86,7 +84,6 @@ poetry run sentryvault change-passphrase
 poetry run sentryvault generate-password --length 20
 ```
 
-
 ### File Encryption
 
 ```bash
@@ -99,12 +96,6 @@ poetry run sentryvault decrypt sensitive.enc sensitive_decrypted.txt
 
 ## 🔧 Advanced Usage
 
-### Environment Variables
-
-- `SENTRY_VAULT_PATH`: Default path for the vault file
-- `SENTRY_VAULT_SHARES`: Default number of shares for sharding
-- `SENTRY_VAULT_THRESHOLD`: Default threshold for shard recovery
-
 ### Password Generation Options
 
 ```bash
@@ -112,7 +103,7 @@ poetry run sentryvault decrypt sensitive.enc sensitive_decrypted.txt
 poetry run sentryvault generate-password --length 20
 
 # Generate a memorable passphrase and copy to clipboard
-poetry run sentryvault generate-password --type memorable -c 
+poetry run sentryvault generate-password --type memorable -c
 ```
 
 ## 🛡️ Security Best Practices
@@ -134,7 +125,7 @@ We welcome contributions! Please read our [Contribution Guidelines](CONTRIBUTING
 poetry install --with dev
 
 # Run tests
-poetry run pytest #tests are yet to be developed, feel free to contribute
+poetry run pytest
 
 # Format code
 poetry run black .
@@ -158,4 +149,4 @@ If you find Sentry Vault useful, please consider:
 
 ---
 
-🔒 *"In a world of digital threats, your security is our mission."*
+🔒 _"In a world of digital threats, your security is our mission."_
