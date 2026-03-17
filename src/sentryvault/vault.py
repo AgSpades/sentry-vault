@@ -92,6 +92,10 @@ class PasswordVault:
             )
 
     def _write_data(self, data):
+        parent_dir = os.path.dirname(os.path.abspath(self.vault_path))
+        if parent_dir:
+            os.makedirs(parent_dir, exist_ok=True)
+
         plaintext_bytes = json.dumps(data).encode()
 
         encrypted_payload = self.crypt.cipher.encrypt(plaintext_bytes)

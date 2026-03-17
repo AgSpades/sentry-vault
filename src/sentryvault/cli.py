@@ -2,18 +2,18 @@ import click
 from getpass import getpass
 from rich.console import Console
 from rich.table import Table
-from rich.panel import Panel
 from rich.progress import Progress
 from cryptography.fernet import InvalidToken
 from .crypto import Cryptify
 from .vault import PasswordVault
 import time
-import os  # Added for vault_path default handling
+import os
 from pathlib import Path
-from typing import Optional
 from .passgen import PasswordGenerator, PasswordType
+from . import __version__
 
 console = Console()
+DEFAULT_VAULT_PATH = str(Path.home() / ".config" / "sentryvault" / "vault.enc")
 
 
 # --- Helper for Sharding Configuration ---
@@ -45,7 +45,7 @@ def _create_sharding_config(total_shares, threshold):
 def vault_options(func):
     func = click.option(
         "--vault-path",
-        default=os.path.join(os.getcwd(), "vault.enc"),
+        default=DEFAULT_VAULT_PATH,
         help="Path to the vault file or base name for shares.",
         show_default=True,
         type=click.Path(),
@@ -64,13 +64,9 @@ def vault_options(func):
 
 
 @click.group()
+@click.version_option(version=__version__, prog_name="sentryvault")
 def main():
     """🔐 SentryVault: Quantum resistant decentralized password manager."""
-    console.print(
-        Panel.fit(
-            "[bold green]SentryVault CLI[/bold green]\n[cyan]Quantum resistant decentralized password manager[/cyan]"
-        )
-    )
 
 
 @main.command()
