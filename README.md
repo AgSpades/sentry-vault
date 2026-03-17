@@ -4,6 +4,7 @@ _A security-focused local password manager with optional sharded storage._
 
 [![License: AGPL-3.0](https://img.shields.io/badge/License-AGPL%203.0-blue.svg)](LICENSE)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
+[![PyPI version](https://img.shields.io/pypi/v/sentryvault?color=blue)](https://pypi.org/project/sentryvault/)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
 ## 🔐 About
@@ -39,23 +40,28 @@ Sentry Vault is an open-source, high-security password manager designed with pri
 ### Prerequisites
 
 - Python 3.10 or higher
-- Poetry (for dependency management)
-- OpenSSL (for cryptographic operations)
 
-### Quick Start
+### Quick Start (Recommended)
+
+Install Sentry Vault directly from PyPI:
+
+```bash
+pip install sentryvault
+```
+
+### Installation from Source
+
+If you prefer to build from source or contribute:
 
 ```bash
 # Clone the repository
 git clone https://github.com/agspades/sentry-vault.git
 cd sentry-vault
 
-# Install dependencies
+# Install dependencies using Poetry
 poetry install
 
-# Activate the virtual environment
-poetry env activate
-
-# Run the CLI
+# Run via poetry
 poetry run sentryvault --help
 ```
 
@@ -65,32 +71,32 @@ poetry run sentryvault --help
 
 ```bash
 # Add a new credential
-poetry run sentryvault add example.com username
+sentryvault add example.com username
 
 # Retrieve a credential
-poetry run sentryvault get example.com
+sentryvault get example.com
 
 # List all stored entries
-poetry run sentryvault list
+sentryvault list
 
 # Remove a credential
-poetry run sentryvault delete example.com
+sentryvault delete example.com
 
 # Change your master passphrase
-poetry run sentryvault change-passphrase
+sentryvault change-passphrase
 
 # Generate a secure password
-poetry run sentryvault generate-password --length 20
+sentryvault generate-password --length 20
 ```
 
 ### File Encryption
 
 ```bash
 # Encrypt a file
-poetry run sentryvault encrypt sensitive.txt sensitive.enc
+sentryvault encrypt sensitive.txt sensitive.enc
 
 # Decrypt a file
-poetry run sentryvault decrypt sensitive.enc sensitive_decrypted.txt
+sentryvault decrypt sensitive.enc sensitive_decrypted.txt
 ```
 
 ## 🔧 Advanced Usage
@@ -99,10 +105,10 @@ poetry run sentryvault decrypt sensitive.enc sensitive_decrypted.txt
 
 ```bash
 # Generate a random password with specific requirements
-poetry run sentryvault generate-password --length 20
+sentryvault generate-password --length 20
 
 # Generate a memorable passphrase and copy to clipboard
-poetry run sentryvault generate-password --type memorable -c
+sentryvault generate-password --type memorable -c
 ```
 
 ## 🛡️ Security Best Practices

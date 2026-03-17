@@ -2,25 +2,25 @@
 name = "sentryvault"
 version = "0.1.0"
 description = "Secure local password manager with Argon2/Fernet encryption and optional Shamir-based sharding"
-authors = [{ name = "Saumyajit Purakayastha", email = "mail@saumyajit.dev" }]
+authors = [{ name = "agspades", email = "mail@saumyajit.dev" }]
 license = "AGPL-3.0-or-later"
 keywords = [
-    "password manager",
-    "local-first",
-    "shamir secret sharing",
-    "argon2",
-    "encryption",
+"password manager",
+"local-first",
+"shamir secret sharing",
+"argon2",
+"encryption",
 ]
 readme = "README.md"
 requires-python = ">=3.10,<4.0"
 dependencies = [
-    "click (>=8.1.7,<9.0.0)",
-    "argon2-cffi (>=23.1.0,<24.0.0)",
-    "cryptography (>=46.0.5,<47.0.0)",
-    "pyshamir (>=1.0.4,<2.0.0)",
-    "rich (>=14.0.0,<15.0.0)",
-    "nltk (>=3.9.3,<4.0.0)",
-    "pyperclip (>=1.9.0,<2.0.0)",
+"click (>=8.1.7,<9.0.0)",
+"argon2-cffi (>=23.1.0,<24.0.0)",
+"cryptography (>=46.0.5,<47.0.0)",
+"pyshamir (>=1.0.4,<2.0.0)",
+"rich (>=14.0.0,<15.0.0)",
+"nltk (>=3.9.3,<4.0.0)",
+"pyperclip (>=1.9.0,<2.0.0)",
 ]
 
 [project.scripts]
