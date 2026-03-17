@@ -28,7 +28,7 @@ license = "Licensed under AGPL-3.0-or-later"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.3.5"
-black = "^25.1.0"
+black = "^26.3.1"
 python-dotenv = "^1.1.0"
 mypy = "^1.15.0"
 
