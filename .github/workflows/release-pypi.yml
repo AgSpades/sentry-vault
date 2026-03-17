@@ -14,7 +14,7 @@ jobs:
       name: pypi
       url: https://pypi.org/p/sentryvault
     permissions:
-      contents: read
+      contents: write
     concurrency:
       group: pypi-release-publish
       cancel-in-progress: false
@@ -33,11 +33,39 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install poetry
 
+      - name: Extract package version
+        id: package_meta
+        run: |
+          VERSION=$(python - <<'PY'
+import pathlib
+import tomllib
+
+data = tomllib.loads(pathlib.Path("pyproject.toml").read_text(encoding="utf-8"))
+print(data["project"]["version"])
+PY
+)
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "tag=v$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Build distribution
+        run: poetry build
+
       - name: Configure Poetry for PyPI token auth
         env:
           PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
         run: |
           poetry config pypi-token.pypi "$PYPI_TOKEN"
 
-      - name: Build and publish package to PyPI
-        run: poetry publish --build --no-interaction
+      - name: Publish package to PyPI
+        run: poetry publish 
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.package_meta.outputs.tag }}
+          name: ${{ steps.package_meta.outputs.tag }}
+          draft: true
+          target_commitish: ${{ github.sha }}
+          generate_release_notes: true
+          files: |
+            dist/*
