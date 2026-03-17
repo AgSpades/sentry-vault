@@ -33,14 +33,18 @@ def test_sharded_vault_creates_shares_and_recovers(tmp_path: Path):
     vault_base = tmp_path / "vault-sharded.enc"
     config = {"total_shares": 3, "threshold": 2}
 
-    vault = PasswordVault("share-pass", vault_path=str(vault_base), sharding_config=config)
+    vault = PasswordVault(
+        "share-pass", vault_path=str(vault_base), sharding_config=config
+    )
     vault.add_entry("service.io", "carol", "pass-999")
 
     share_paths = [tmp_path / f"vault-sharded.enc.s{i}" for i in range(1, 4)]
     for share_path in share_paths:
         assert share_path.exists()
 
-    recovered = PasswordVault("share-pass", vault_path=str(vault_base), sharding_config=config)
+    recovered = PasswordVault(
+        "share-pass", vault_path=str(vault_base), sharding_config=config
+    )
     assert recovered.get_entry("service.io") == {
         "username": "carol",
         "password": "pass-999",

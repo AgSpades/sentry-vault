@@ -1,6 +1,5 @@
 # Sentry Vault
 
-![Sentry Vault](assets/sentry-vault-logo.png)  
 _A security-focused local password manager with optional sharded storage._
 
 [![License: AGPL-3.0](https://img.shields.io/badge/License-AGPL%203.0-blue.svg)](LICENSE)

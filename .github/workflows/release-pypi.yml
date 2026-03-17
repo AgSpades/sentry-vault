@@ -36,14 +36,7 @@ jobs:
       - name: Extract package version
         id: package_meta
         run: |
-          VERSION=$(python - <<'PY'
-import pathlib
-import tomllib
-
-data = tomllib.loads(pathlib.Path("pyproject.toml").read_text(encoding="utf-8"))
-print(data["project"]["version"])
-PY
-)
+          VERSION=$(python -c "import pathlib, tomllib; data = tomllib.loads(pathlib.Path('pyproject.toml').read_text(encoding='utf-8')); print(data['project']['version'])")
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
           echo "tag=v$VERSION" >> "$GITHUB_OUTPUT"
 
@@ -57,7 +50,7 @@ PY
           poetry config pypi-token.pypi "$PYPI_TOKEN"
 
       - name: Publish package to PyPI
-        run: poetry publish 
+        run: poetry publish
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2

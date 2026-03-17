@@ -470,7 +470,7 @@ def generate_password(
 
         # Add to clipboard history if available
         # (Removed rich.clipboard usage because it does not exist)
-        
+
     except Exception as e:
         console.print(f"[red]❌ Error generating password: {e}[/]")
         return 1
