@@ -1,6 +1,6 @@
 [project]
 name = "sentryvault"
-version = "0.1.1"
+version = "0.1.2"
 description = "Secure local password manager with Argon2/Fernet encryption and optional Shamir-based sharding"
 authors = [{ name = "agspades", email = "mail@saumyajit.dev" }]
 license = "AGPL-3.0-or-later"
